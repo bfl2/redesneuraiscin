@@ -12,30 +12,42 @@ def generate_class_split(class_dataset):
     print("sets: ",train.shape[0]/dataset_length, validate.shape[0]/dataset_length, test.shape[0]/dataset_length)
     return train, validate, test
 
-def adjust_split(dataset):
-    factor = 2 #para o dataset em questao
-    if(factor==2):
-        adjusted_split = dataset.append(dataset);
-        adjusted_split = adjusted_split.sample(frac=1)
+def adjust_split(dataset, factor=2):
+    adjusted_split = pd.concat([dataset]*factor, ignore_index=True)
+    adjusted_split = adjusted_split.sample(frac=1)
 
     return adjusted_split
 
 def scaled_splits(dataset_class0):
     train, validate, test = generate_class_split(dataset_class0)
-    trainw = adjust_split(train)
-    validatew = adjust_split(validate)
-    testw = adjust_split(test)
+    trainw = adjust_split(train, factor=3)
+    validatew = adjust_split(validate, factor=3)
+    testw = adjust_split(test, factor=3)
 
     return trainw, validatew, testw
 
 def combine_split_class(split_class0, split_class1):
     #combine and shuffle dataset
+    if(split_class0.shape[0] > split_class1.shape[0]):
+        split_class0 = split_class0.iloc[0:split_class1.shape[0]]
+        print('resized_shape_class0: ', split_class0.shape[0])
+        print('shape_class1: ', split_class1.shape[0])
+    elif(split_class1.shape[0] > split_class0.shape[0]):
+        split_class1.shape[0] = split_class1.iloc[0:split_class0.shape[0]]
+        print('resized_shape_class1: ', split_class1.shape[0])
+        print('shape_class0: ', split_class0.shape[0])
+        
     result = split_class0.append(split_class1).sample(frac=1)
+    
     return result
 
 def build_train_validation_test_sets(dataset_class0, dataset_class1):
     train0, validate0, test0 = scaled_splits(dataset_class0)
     train1, validate1, test1 = generate_class_split(dataset_class1)
+    
+    print('shape_train: ', train0.shape, train1.shape)
+    print('shape_validate: ', validate0.shape, validate1.shape)
+    print('shape_test: ', test0.shape, test1.shape)
 
     train = combine_split_class(train0, train1)
     validate = combine_split_class(validate0, validate1)
