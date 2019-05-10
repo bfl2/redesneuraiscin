@@ -84,15 +84,15 @@ def print_metrics_summary(accuracy, recall, precision, f1, auroc=None, aupr=None
 def trainMLP():
     base_datapath = "data/"
 
-    train = pd.read_csv(base_datapath + "test", sep="\t")
+    train = pd.read_csv(base_datapath + "train", sep="\t")
     validation = pd.read_csv(base_datapath + "validation", sep="\t")
     test = pd.read_csv(base_datapath + "testDefault", sep="\t")
 
-    X_train = train.iloc[:, 1:-2].values
+    X_train = train.iloc[:, 2:-2].values
     Y_train = train.iloc[:, -1].values
-    X_val = validation.iloc[:, 1:-2].values
+    X_val = validation.iloc[:, 2:-2].values
     Y_val = validation.iloc[:, -1].values
-    X_test = test.iloc[:, 1:-2].values
+    X_test = test.iloc[:, 2:-2].values
     Y_test = test.iloc[:, -1].values
 
     input_dim = X_train.shape[1]
