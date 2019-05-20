@@ -104,3 +104,23 @@ def results_summary(history, Y_test, y_pred_class, y_pred_scores):
     print('\nPerformance no conjunto de teste:')
     accuracy, recall, precision, f1, auroc, aupr = compute_performance_metrics(Y_test, y_pred_class, y_pred_scores)
     print_metrics_summary(accuracy, recall, precision, f1, auroc, aupr)
+
+def partitionateDataset():
+    """Funcao para dividir os datasets em entrada e saida
+
+      Retorno:
+      Conjuntos de entrada e saida para treino, validacao e teste
+      """
+    base_datapath = "data/"
+
+    train = pd.read_csv(base_datapath + "train", sep="\t")
+    validation = pd.read_csv(base_datapath + "validation", sep="\t")
+    test = pd.read_csv(base_datapath + "testDefault", sep="\t")
+
+    X_train = train.iloc[:, 2:-2].values
+    Y_train = train.iloc[:, -1].values
+    X_val = validation.iloc[:, 2:-2].values
+    Y_val = validation.iloc[:, -1].values
+    X_test = test.iloc[:, 2:-2].values
+    Y_test = test.iloc[:, -1].values
+    return X_train, Y_train, X_val, Y_val, X_test, Y_test
