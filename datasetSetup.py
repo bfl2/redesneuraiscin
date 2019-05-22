@@ -84,5 +84,36 @@ def split_dataset():
     print("###Finished splitting dataset###")
     return
 
+def generate_ensemble_split(dataset, n_ensembles, name):
+    dataset_class0 = dataset[dataset['IND_BOM_1_1']==0]
+    dataset_class1 = dataset[dataset['IND_BOM_1_1']==1]
+
+    class0_length = dataset_class0.shape[0]
+    class1_length = dataset_class1.shape[0]
+
+    frac0 = floor(class0_length/n_ensembles)
+    frac1 = floor(class1_length/n_ensembles)
+
+    for i in range(0, n_ensembles-1):
+        class0_datasets[i] = dataset_class0.iloc[ i*frac0 : (i+1) * frac0]
+        class1_datasets[i] = dataset_class1.iloc[ i*frac1 : (i+1) * frac1]
+
+    if class0_length < class1_length:
+        class0_datasets = adjust_ensemble_split(class0_datasets, frac0)
+    elif class0_length > class1_length:
+        class1_datasets = adjust_ensemble_split(class1_datasets, frac1)
+
+    for i in range(0,n_ensembles-1):
+        combined = class0_datasets[i].append(class1_datasets[i]).sample(frac=1)
+        combined.to_csv("data/{}Ensemble{}".format(name, (i+1)), sep='\t')
+
+def adjust_ensemble_split(datasets, factor=2):
+    result = []
+    i = 0
+    for ds in datasets:
+        result[i++] = adjust_split(ds, factor)
+
+    return result
+
 
 split_dataset()
