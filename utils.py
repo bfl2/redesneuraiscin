@@ -94,7 +94,7 @@ def datasets_split():
 def ensembles_datasets_split():
     datasets = []
     for i in range(1, 6):
-        base_datapath = "data/datasets-projeto/dt"+str(i)
+        base_datapath = "data/datasets-projeto/dt"+str(i)+"/"
 
         train = pd.read_csv(base_datapath + "train", sep="\t")
         validation = pd.read_csv(base_datapath + "validation", sep="\t")
@@ -120,3 +120,66 @@ def results_summary(history, Y_test, y_pred_class, y_pred_scores):
     print('\nPerformance no conjunto de teste:')
     accuracy, recall, precision, f1, auroc, aupr = compute_performance_metrics(Y_test, y_pred_class, y_pred_scores)
     print_metrics_summary(accuracy, recall, precision, f1, auroc, aupr)
+
+
+
+def add_combination(dataset, tuple, best_features):
+    i1, i2, operation = tuple
+    feature1 = best_features[i1]
+    feature2 = best_features[i2]
+
+    if (operation == "mul"):
+        newFeatureName = feature1 + "*" + feature2
+        dataset.loc[:, newFeatureName] = dataset[feature1] * dataset[feature2]
+    if (operation == "sqrt"):
+        newFeatureName = operation + feature1
+        dataset.loc[:,newFeatureName] = np.sqrt(dataset[feature1])
+
+
+    return dataset
+
+def add_new_columns(dataset, list_of_combinations, best_features):
+    y_cols = dataset.iloc[: , -2:]
+    columns = ["IND_BOM_1_1", "IND_BOM_1_2"]
+
+    dataset = dataset.drop(columns, axis=1)
+
+    for combination in list_of_combinations:
+        dataset = add_combination(dataset, combination, best_features)
+
+    ##reatach y_cols after adding columns
+    dataset[columns[0]] = y_cols.iloc[: , :1]
+    dataset[columns[1]] = y_cols.iloc[: , 1:]
+
+    return dataset
+
+def tuned_dataset_split(dataset, print_to_csv = False, dataset_name = "TRN-tuned"):
+    datapath = "data/"
+
+    worstListFileName = 'worst30.txt'
+    bestFeaturesFileName = 'best30.txt'
+    combinations = [(0, 2, 'mul'), (0, 4, 'mul'), (1, 2, 'mul'), (1, 3, 'mul'), (1, 4, 'mul'), (2, 4, 'mul'), (3, 5, 'mul'), (3, 6, 'mul'), (4, 8, 'mul'), (4, 5, 'mul'), (4, 7, 'mul'), (5, 10, 'mul'), (6, 12, 'mul'), (6, 14, 'mul'), (6, 20, 'mul'), (0, 0, 'sqrt'), (1, 1, 'sqrt'), (2, 2, 'sqrt')]
+
+    worstFeatures = [line.rstrip('\n') for line in open(worstListFileName)]
+    bestFeatures = [line.rstrip('\n') for line in open(bestFeaturesFileName)]
+    dataset = dataset.drop(worstFeatures, axis=1)
+    print("##REMOVED WORST FEATURES##")
+
+    dataset = add_new_columns(dataset, combinations, bestFeatures)
+
+    print("## ADDED NEW COLUMNS ##")
+
+    if (print_to_csv):
+        dataset.to_csv(datapath + dataset_name, sep='\t')
+
+    print(dataset.columns.values)
+    print(dataset.head(2))
+    print("###DONE###")
+    return dataset
+
+def generate_trn_tuned_dataset():
+
+    dataset = pd.read_csv("data/TRN", sep="\t")
+    tuned_dataset_split(dataset, print_to_csv=True)
+    return
+
