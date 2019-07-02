@@ -162,7 +162,7 @@ def tuned_dataset_split(dataset, print_to_csv = False, dataset_name = "TRN-tuned
 
     worstFeatures = [line.rstrip('\n') for line in open(worstListFileName)]
     bestFeatures = [line.rstrip('\n') for line in open(bestFeaturesFileName)]
-    dataset = dataset.drop(worstFeatures, axis=1)
+    #dataset = dataset.drop(worstFeatures, axis=1)
     print("##REMOVED WORST FEATURES##")
 
     dataset = add_new_columns(dataset, combinations, bestFeatures)
@@ -183,3 +183,4 @@ def generate_trn_tuned_dataset():
     tuned_dataset_split(dataset, print_to_csv=True)
     return
 
+#generate_trn_tuned_dataset()

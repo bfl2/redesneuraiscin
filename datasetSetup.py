@@ -90,3 +90,5 @@ def split_dataset(dataset_path = "data/TRN"):
 
 def split_tuned_dataset():
     split_dataset("data/TRN-tuned")
+
+split_dataset()
